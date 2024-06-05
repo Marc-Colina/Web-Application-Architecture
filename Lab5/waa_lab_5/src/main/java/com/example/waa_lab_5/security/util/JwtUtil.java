@@ -1,20 +1,74 @@
 package com.example.waa_lab_5.security.util;
 
 import io.jsonwebtoken.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 @Component
 public class JwtUtil {
-    private final String secret = "ILoveThePhilippines";
+    private final String secret = "IloveThePhilippines";
     private final long expiration = 5 * 60 * 60 * 60;
-    // private final long expirataion = 5;
+    //     private final long expiration = 5;
+    private final long refreshExpiration = 5 * 60 * 60 * 60 * 60;
+    @Autowired
+    UserDetailsService userDetailsService;
 
-    public String generateToken(String email) {
+    public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
+        final Claims claims = getAllClaimsFromToken(token);
+        return claimsResolver.apply(claims);
+    }
+
+    private Claims getAllClaimsFromToken(String token) {
+        return Jwts.parser()
+                .setSigningKey(secret)
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    public Date getIssuedAtDateFromToken(String token) {
+        return getClaimFromToken(token, Claims::getIssuedAt);
+    }
+
+    public Date getExpirationDateFromToken(String token) {
+        return getClaimFromToken(token, Claims::getExpiration);
+    }
+
+    public Boolean isTokenExpired(String token) {
+        final Date expiration = getExpirationDateFromToken(token);
+        return expiration.before(new Date());
+    }
+
+    public String generateToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", userDetails.getAuthorities());
+
+        return doGenerateToken(claims, userDetails.getUsername());
+    }
+
+
+    private String doGenerateToken(Map<String, Object> claims, String subject) {
         return Jwts.builder()
-                .setSubject(email)
+                .setClaims(claims)
+                .setSubject(subject)
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
+                .signWith(SignatureAlgorithm.HS512, secret)
+                .compact();
+    }
+
+    // Overridden to accommodate the refresh token
+    public String doGenerateToken(String subject) {
+        return Jwts.builder()
+                .setSubject(subject)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(SignatureAlgorithm.HS512, secret)
@@ -25,7 +79,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expiration * 60))
+                .setExpiration(new Date(System.currentTimeMillis() + refreshExpiration))
                 .signWith(SignatureAlgorithm.HS512, secret)
                 .compact();
     }
@@ -58,6 +112,16 @@ public class JwtUtil {
         return false;
     }
 
+    public Authentication getAuthentication(String token) {
+        Claims claims = getAllClaimsFromToken(token);
+        UserDetails userDetails =
+                userDetailsService.loadUserByUsername(claims.getSubject()); // LEFT THIS HERE ON PURPOSE
+        var authentication = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities());
+        return authentication;
+    }
+
+
     public String doGenerateRefreshToken(Map<String, Object> claims, String subject) {
 
         return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
@@ -82,79 +146,13 @@ public class JwtUtil {
         }
         return result;
     }
-}
-
-
-//import io.jsonwebtoken.*;
-//import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-//import org.springframework.security.core.Authentication;
-//import org.springframework.security.core.userdetails.UserDetails;
-//import org.springframework.security.core.userdetails.UserDetailsService;
-//import org.springframework.stereotype.Component;
-//
-//import java.util.Date;
-//import java.util.HashMap;
-//import java.util.Map;
-//import java.util.function.Function;
-//
-//@Component
-//public class JwtUtil {
-//
-//    private final String secret = "top-secret";
+//    private final String secret = "ILoveThePhilippines";
 //    private final long expiration = 5 * 60 * 60 * 60;
-//    //     private final long expiration = 5;
-//    private final long refreshExpiration = 5 * 60 * 60 * 60 * 60;
-//    @Autowired
-//    UserDetailsService userDetailsService;
+//    // private final long expirataion = 5;
 //
-//    public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
-//        final Claims claims = getAllClaimsFromToken(token);
-//        return claimsResolver.apply(claims);
-//    }
-//
-//    private Claims getAllClaimsFromToken(String token) {
-//        return Jwts.parser()
-//                .setSigningKey(secret)
-//                .parseClaimsJws(token)
-//                .getBody();
-//    }
-//
-//    public Date getIssuedAtDateFromToken(String token) {
-//        return getClaimFromToken(token, Claims::getIssuedAt);
-//    }
-//
-//    public Date getExpirationDateFromToken(String token) {
-//        return getClaimFromToken(token, Claims::getExpiration);
-//    }
-//
-//    public Boolean isTokenExpired(String token) {
-//        final Date expiration = getExpirationDateFromToken(token);
-//        return expiration.before(new Date());
-//    }
-//
-//    public String generateToken(UserDetails userDetails) {
-//        Map<String, Object> claims = new HashMap<>();
-//        claims.put("roles", userDetails.getAuthorities());
-//
-//        return doGenerateToken(claims, userDetails.getUsername());
-//    }
-//
-//
-//    private String doGenerateToken(Map<String, Object> claims, String subject) {
+//    public String generateToken(String email) {
 //        return Jwts.builder()
-//                .setClaims(claims)
-//                .setSubject(subject)
-//                .setIssuedAt(new Date())
-//                .setExpiration(new Date(System.currentTimeMillis() + expiration))
-//                .signWith(SignatureAlgorithm.HS512, secret)
-//                .compact();
-//    }
-//
-//    // Overridden to accommodate the refresh token
-//    public String doGenerateToken(String subject) {
-//        return Jwts.builder()
-//                .setSubject(subject)
+//                .setSubject(email)
 //                .setIssuedAt(new Date())
 //                .setExpiration(new Date(System.currentTimeMillis() + expiration))
 //                .signWith(SignatureAlgorithm.HS512, secret)
@@ -165,7 +163,7 @@ public class JwtUtil {
 //        return Jwts.builder()
 //                .setSubject(email)
 //                .setIssuedAt(new Date())
-//                .setExpiration(new Date(System.currentTimeMillis() + refreshExpiration))
+//                .setExpiration(new Date(System.currentTimeMillis() + expiration * 60))
 //                .signWith(SignatureAlgorithm.HS512, secret)
 //                .compact();
 //    }
@@ -198,16 +196,6 @@ public class JwtUtil {
 //        return false;
 //    }
 //
-//    public Authentication getAuthentication(String token) {
-//        Claims claims = getAllClaimsFromToken(token);
-//        UserDetails userDetails =
-//                userDetailsService.loadUserByUsername(claims.getSubject()); // LEFT THIS HERE ON PURPOSE
-//        var authentication = new UsernamePasswordAuthenticationToken(
-//                userDetails, null, userDetails.getAuthorities());
-//        return authentication;
-//    }
-//
-//
 //    public String doGenerateRefreshToken(Map<String, Object> claims, String subject) {
 //
 //        return Jwts.builder().setClaims(claims).setSubject(subject).setIssuedAt(new Date(System.currentTimeMillis()))
@@ -232,4 +220,4 @@ public class JwtUtil {
 //        }
 //        return result;
 //    }
-//}
+}

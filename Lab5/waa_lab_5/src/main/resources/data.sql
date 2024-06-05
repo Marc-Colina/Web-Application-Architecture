@@ -1,7 +1,14 @@
 -- -- Insert a single post
 --
 INSERT INTO Users (email, password, firstname, lastname)
-VALUES ('marccolina456@gmail.com', '123456', 'Marc', 'Colina');
+VALUES ('marccolina456@gmail.com', '123456', 'Marc', 'Colina'),
+       ('marccolina123@gmail.com', '123456', 'Marc', 'Lennard'),
+       ('marccolina789@gmail.com', '123456', 'Marc', 'Seares');
+
+INSERT INTO Role (role)
+VALUES ('CLIENT'),
+       ('ADMIN');
+
 -- INSERT INTO Users (name)
 -- VALUES ('Mary');
 -- INSERT INTO Users (name)

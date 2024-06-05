@@ -20,7 +20,8 @@ public class LoggerAspect {
         this.iLoggerService = iLoggerService;
     }
 
-    @Pointcut("execution(* com.example.waa_lab_5.controller..*(..))")
+
+    @Pointcut("execution(* com.example.waa_lab_5.controller.*.*(..))")
     public void saveLogsInControllerMethods() {
     }
 

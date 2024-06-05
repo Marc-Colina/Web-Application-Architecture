@@ -20,7 +20,7 @@ public class ExceptionAspect {
         this.iExceptionService = iExceptionService;
     }
 
-    @Pointcut("within(com.example.waa_lab_5..*)")
+    @Pointcut("within(com.example.waa_lab_5.*)")
     public void saveExceptionWithinPackage() {
     }
 
