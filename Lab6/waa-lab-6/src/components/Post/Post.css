@@ -1,0 +1,19 @@
+.post {
+    /* Basic card styling */
+    border: 1px solid #ccc;
+    box-shadow: 2rem 2rem 8rem rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin: 2rem;
+    border-radius: 1rem;
+    background-color: #fff;
+    min-width: 25rem;
+    min-height: 12rem;
+
+    /* If you want to add a transition for hover effect */
+    transition: box-shadow 0.3s ease;
+}
+
+.post:hover {
+    /* Add a deeper shadow on hover */
+    box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.2);
+}

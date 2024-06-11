@@ -1,0 +1,32 @@
+.post-details{
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ccc;
+    box-shadow: 2rem 2rem 8rem rgba(0, 0, 0, 0.1);
+    padding: 2rem;
+    margin: 2rem;
+    border-radius: 1rem;
+    background-color: #fff;
+    min-width: 25rem;
+    min-height: 12rem;
+}
+
+.post-details:hover{
+    box-shadow: 4px 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.author-title{
+    margin-bottom: 3rem;
+}
+.title{
+    text-decoration: underline;
+    font-size: 2rem;
+}
+
+.author{
+    font-size: 1.5rem;
+}
+
+.author{
+    text-decoration: none;
+}
