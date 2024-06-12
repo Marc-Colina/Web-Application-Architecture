@@ -1,0 +1,14 @@
+.add-post{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.add-post input { /* Or you can specify a fixed width, e.g., width: 200px; */
+    max-width: 50rem; /* Ensures input does not exceed the container's width */
+}
+
+.add-post-content{
+    height: 10rem;
+}
+
